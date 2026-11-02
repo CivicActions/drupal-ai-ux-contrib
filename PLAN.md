@@ -131,11 +131,11 @@ Non-skill items:
 
 | Phase | Scope | Est. |
 |---|---|---|
-| 0 | Create repo, README, `install.sh`, `profile.md` template, decide name/license | 2 h |
-| 1 | Guide sections 2, 3, 4, 6, 8, 9 + templates (the parts a designer needs before the first meeting) | 6 h |
-| 2 | `ai-ux-radar` SKILL.md + queries.md + lanes.md; `ux_radar.py`; Copilot adapter; validate on 3 clients against live API | 8 h |
-| 3 | Guide sections 1, 5, 7; `ai-ux-story-review` skill | 6 h |
-| 4 | Digest automation; meeting-prep skill; upstream docs issues filed | later |
+| 0 | Create repo, README, `install.sh`, `profile.md` template, decide name/license | done 2026-11-02 (license open) |
+| 1 | Guide sections 2, 3, 4, 6, 8, 9 + templates (the parts a designer needs before the first meeting) | done 2026-11-02 (all 9 sections) |
+| 2 | `ai-ux-radar` SKILL.md + queries.md + lanes.md; `ux_radar.py`; Copilot adapter; validate on 3 clients against live API | done 2026-11-02; fetcher validated live, client run-through pending |
+| 3 | `ai-ux-story-review` skill (plan + report modes, `story_steps.py`), guide trim | done 2026-11-02 |
+| 4 | Digest automation; meeting-prep skill; upstream docs issues filed | next |
 
 Validation per phase: a designer on the team runs the first-week checklist and the radar cold, without help; fix what they trip on before adding more. Re-run the §1.3 label census monthly — the queries in the radar must track drift.
 

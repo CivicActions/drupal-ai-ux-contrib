@@ -8,7 +8,7 @@
 
 **I cannot find the demo source code.** The build repositories are partner-only. Everyone can file and comment in the public `ai_demo` queue; partners triage and build.
 
-**Do I need a local Drupal?** No for story reviews, UX review answers, content and accessibility findings on the demo. Yes for reviewing a merge request's UI before it merges; ask a developer on the team to pull it up, or ask the author for screenshots.
+**Do I need a local Drupal?** No for story reviews, request answers, content and accessibility findings on the demo. Yes to review a merge request's UI before it merges; ask a developer to pull it up, or the author for screenshots.
 
 **Which UX tag?** `Needs UX review` in the AI ecosystem. `Needs usability review` is Drupal core's tag and the core UX team's queue.
 

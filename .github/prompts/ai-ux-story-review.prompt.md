@@ -1,0 +1,8 @@
+---
+description: 'Plan a usability review of an AI demo story, or write up its findings as the summary comment and follow-up issues'
+agent: 'agent'
+---
+
+<!-- Thin adapter for VS Code Copilot; canonical source is skills/ai-ux-story-review/SKILL.md (installed at .github/skills/ai-ux-story-review/) — edit there -->
+
+Run the ai-ux-story-review procedure: follow [SKILL.md](../skills/ai-ux-story-review/SKILL.md) exactly, with [protocol.md](../skills/ai-ux-story-review/reference/protocol.md) for the task questions and [report-formats.md](../skills/ai-ux-story-review/reference/report-formats.md) for the exact comment and issue shapes. Plan mode when the user names a review issue or story; report mode when they bring findings. Use `python3 scripts/story_steps.py <url>` to read a story page when one is given. Draft only; post nothing.

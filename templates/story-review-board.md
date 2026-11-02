@@ -22,11 +22,15 @@ Instance: Drupal Forge, started <date>
 3. Feature-specific questions from the issue
    - ...
 
-4. Findings, ranked (one row each)
-   | # | Severity (blocker / major / minor) | What happened | Where (path) | Who it affects | Evidence frame |
+4. Findings, ranked (one row each; severity 1–4, Nielsen Norman scale, 4 = usability catastrophe)
+   | # | Severity | What happened | Where (path) | Who it affects | Evidence frame | UI change or story text? |
 
 5. Low-fidelity exploration (top 2–3 findings)
    - Annotated crop or sketch per finding, with the one-line change it proposes
 
 6. Open questions for the Monday meeting
+
+Done when: findings for every task are here; each demo bug has its own ai_demo issue linked to the review; a comment on the review issue gives the 3 most important problems and the story changes; you can show this at the next Monday UX meeting.
 ```
+
+The `ai-ux-story-review` skill pre-fills this outline from the review issue and the story page, and later turns the findings into the summary comment and follow-up issues.

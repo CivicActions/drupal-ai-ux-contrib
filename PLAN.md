@@ -2,6 +2,8 @@
 
 Onboarding guide + standalone `ai-ux-radar` skill for designers and UX practitioners joining the Drupal AI Initiative. This repo is the implementation. Research snapshot 2026-11-02; GitLab counts are point-in-time.
 
+> **Revision 2026-11-02 (after the first paste test).** Pasting SKILL.md into a web chat client failed: the skill depended on sibling files, a shell, and raw API pages of 800 KB. Decisions: no team profile (fit scoring was constant for a team with all five skills), no numeric scores (signals instead), no scheduled radar, no report file. The script detects the sprint itself and prints the finished report; both SKILL.md files are self-contained; a lite scan of three URLs (~110 KB) serves clients with URL fetch only. The repo will be made public. Sections 2.1, 2.3 and 2.4 below describe the first design and are kept for the record.
+
 ## 1. Research findings
 
 ### 1.1 The initiative already has a UX track — it is just hard to find
@@ -135,7 +137,8 @@ Non-skill items:
 | 1 | Guide sections 2, 3, 4, 6, 8, 9 + templates (the parts a designer needs before the first meeting) | done 2026-11-02 (all 9 sections) |
 | 2 | `ai-ux-radar` SKILL.md + queries.md + lanes.md; `ux_radar.py`; Copilot adapter; validate on 3 clients against live API | done 2026-11-02; fetcher validated live, client run-through pending |
 | 3 | `ai-ux-story-review` skill (plan + report modes, `story_steps.py`), guide trim | done 2026-11-02 |
-| 4 | Digest automation; meeting-prep skill; upstream docs issues filed | next |
+| 3b | Zero-config rewrite: script prints the report, self-contained skills, lite scan; profile/lanes/queries/report-formats removed | done 2026-11-02 |
+| 4 | Meeting-prep skill; upstream docs issues filed; confirm the lite scan in a web client | next |
 
 Validation per phase: a designer on the team runs the first-week checklist and the radar cold, without help; fix what they trip on before adding more. Re-run the §1.3 label census monthly — the queries in the radar must track drift.
 

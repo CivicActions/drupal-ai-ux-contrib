@@ -1,75 +1,63 @@
 ---
 name: ai-ux-radar
-description: Finds design, UX, content-design, and accessibility work in the Drupal AI Initiative on git.drupalcode.org and ranks it for a designer or UX practitioner. Loads when the user invokes it by name (ai-ux-radar), asks what UX or design work the initiative needs, what to pick up as a designer this week, which Needs UX review requests are waiting, or what is on the Monday AI UX meeting. Read-only against GitLab, anonymous API, no local Drupal, no glab. Reports in chat; writes a UX-RADAR-<date>.md file only when asked.
+description: Finds design, UX, content-design and accessibility work in the Drupal AI Initiative on git.drupalcode.org and presents it by lane for a designer or UX practitioner. Loads when the user invokes it by name (ai-ux-radar), asks what UX or design work the initiative needs, what to pick up as a designer this week, which Needs UX review requests are waiting, or what is on the Monday AI UX meeting. Zero configuration, read-only, anonymous API, no local Drupal. Works with a shell (full scan) or with URL fetch only (lite scan).
 ---
 
 # AI UX Radar
 
-Scan the Drupal AI Initiative queues for work a designer, researcher, content designer or accessibility reviewer can take, score it against the team profile, and report it by lane. Read-only: the only write is an optional report file the user explicitly asks for. The user posts on GitLab; this skill never does.
+Show a designer what the Drupal AI Initiative needs from them this week. Read-only: nothing here posts to GitLab or Slack; the person does that. No configuration file; every run is the same for everyone on the team.
 
-References: [reference/lanes.md](reference/lanes.md) (lane rules, scoring, routing), [reference/queries.md](reference/queries.md) (every API call as a literal curl, for clients without the script), [reference/profile.md](reference/profile.md) (team profile; edit this, nothing else).
-
-## Procedure
-
-### 0. Orient
-
-1. Read `reference/profile.md`. Missing → every fit score is 2 and say so in the report.
-2. Locate the fetcher: `scripts/ux_radar.py` next to the kit (`../../scripts/ux_radar.py` relative to this file, or `scripts/ux_radar.py` in the project when the skill was installed with `--copy`). Needs `python3` only. Absent, or no shell → use the curl twins in queries.md, one call per section; every URL is literal so a chat client with web access can fetch them.
-3. Today's date decides the "next Monday meeting" and request ages.
-
-### 1. Fetch (one command)
+## Full scan (any client with a shell)
 
 ```bash
 python3 scripts/ux_radar.py
 ```
 
-Prints: a `# sprint` line (detected sprint from the profile baseline, rollover flag), a `# projects` line, a TSV of candidates `lane, ref, flags, labels, updated, title, url`, then the next and previous `Drupal AI UX meeting` issues with their notes. Add `--json` for machine use, `--sprint NN` to override the baseline, `--include-terminal` to see items labelled fixed/closed/postponed/blocked/inProgress/rtbc (dropped by default: done, or someone's work).
+The script lives next to this skill (`../../scripts/ux_radar.py` from this file, or `scripts/ux_radar.py` in the project when installed with `--copy`). Stdlib only, about ten seconds. It detects the current sprint, fetches, classifies, and prints the finished markdown report. Present that report; do not rebuild it. Then answer the user's question (what to pick up, what is on Monday, what is unclaimed) from it. If the user names a lane or skill ("I do content design", "accessibility only"), lead with that section.
 
-Rollover `yes` → tell the user to bump `sprint:` in profile.md. `S<N>:ai=0` for every probe → sprint undetermined; report with that caveat.
+Flags: `--lite` (below), `--tsv`, `--json`, `--sprint NN` to skip detection, `--include-terminal` to show items whose labels say fixed/closed/postponed/blocked/inProgress/rtbc (hidden by default: done, or someone's work).
 
-Budget: one script run, or ≤ 12 curl calls. Never one call per issue. Do not open issue pages to "check" candidates; the TSV carries labels, assignees and dates.
+## Lite scan (no shell, URL fetch only)
 
-### 2. Classify
+Fetch these three URLs, then build the report sections 1–3 below from the JSON (title, labels, assignees, updated_at, web_url, description):
 
-The script assigns a lane (story-review, review-request, accessibility, design-exploration, content-naming, research-ia, housekeeping, other-ux) by the rules in lanes.md. Reassign when the title plainly says otherwise, and say so. Items flagged `claimed:<user>` go to **Watch** unless the user is one of the profile's GitLab usernames (then **Yours**); so do `ask-first` items (Canvas has its own design team; say to ask in `#ai-ux`). `novice` items are dropped when the profile says to skip them. `ux-request-age` is days since the request was last updated, the SLA proxy.
+1. Open UX review requests, instance-wide: `https://git.drupalcode.org/api/v4/groups/project/issues?state=opened&labels=Needs%20UX%20review&per_page=50`
+2. Open story reviews in the demo queue: `https://git.drupalcode.org/api/v4/projects/project%2Fai_demo/issues?state=opened&search=UX%20review&in=title&per_page=50`
+3. The UX meeting issues, newest last: `https://git.drupalcode.org/api/v4/projects/project%2Fai_initiative/issues?search=UX%20meeting&in=title&state=opened&per_page=100&order_by=created_at&sort=asc`; pick the first title dated today or later as "next" and the last dated before today as "previous"; the notes are in `description`.
 
-### 3. Score
+Say that it is a lite scan: it misses accessibility, content and design items on the sprint, which need the full scan. Do not fetch the sprint label listings (`labels=2026Sprint…`); they are 800 KB per page.
 
-Per candidate, /10, arithmetic shown, e.g. `8/10 (fit 3 · access 3 · urgency 2 · effort 0)`:
+## Report
 
-| Axis | Points |
-|---|---|
-| Fit 0–4 | lane matches a checked skill in profile.md: research/IA → research 4, story-review → research 3 + content 1, review-request → interaction 3, content-naming → content design 4, accessibility → a11y 4, design-exploration → interaction/visual 3–4, housekeeping → 2. Minus 1 when the item needs reading PHP/YAML and familiarity ≤ 1 |
-| Access 0–3 | reproducible on a Drupal Forge demo instance (anything in `ai_demo`, or a path under the demo's enabled modules) = 3; screenshots or text in the issue suffice = 2; needs a specific module not on the demo = 1; needs a local Drupal or an MR checkout = 0 |
-| Urgency 0–2 | `Needs UX review` with `ux-request-age` > 3 days and no reply = 2; on the current sprint, or listed under "Next story reviews"/"Next Steps" in the meeting notes = 1 |
-| Effort 0–1 | bounded (one screen, one label set, one story) = 1; META/plan/cross-module = 0 |
+Sections, in this order, every one present ("none found" when empty). Links are `https://git.drupalcode.org/project/<name>/-/issues/<iid>`, never drupal.org.
 
-Ties: more recent `updated`, then project name, then iid.
+1. **This Monday's UX meeting** — next meeting date and link; from the previous meeting's notes: Next story reviews, Decisions, Questions, Next Steps with owners.
+2. **Story reviews** — unclaimed first. These run on a free Drupal Forge demo instance; no Drupal install.
+3. **UX review requests** — oldest first with age in days. The track's promise is acknowledgement within 3 business days.
+4. **Accessibility, content, design** — full scan only.
+5. **Research and discussion** — METAs and plans worth a comment or sketch. Full scan only.
+6. **Housekeeping** — docs, notes-to-issues. Full scan only.
+7. **Watch** — claimed items, and Canvas items (`ask-first`: that project has its own design team; ask in `#ai-ux` before picking).
+8. **How to act** — claim by commenting an ETD and assigning yourself; where each lane's findings go; the disclosure block reminder.
 
-### 4. Report (chat)
+Signals shown per item instead of a score: `unclaimed` / `claimed:<user>`, `forge` (reproducible on a demo instance), `sprint` (on the current sprint), `age:<n>d` (request age), `novice`, `ask-first`.
 
-Sections in this order, each present ("none found" when empty), every link `https://git.drupalcode.org/project/<name>/-/issues/<iid>`:
+## Lanes
 
-1. **This Monday's UX meeting** — date, link, agenda if any; from the previous notes: open "Next Steps" owners, "Next story reviews", decisions worth knowing.
-2. **Sprint** — detected label, counts, rollover flag.
-3. **Yours** — items assigned to a profile username.
-4. **Story reviews** — unclaimed first, with score and the story path when known.
-5. **UX review requests** — oldest unanswered first; say the SLA (3 business days) status.
-6. **Design, content, accessibility** — top 5 across those lanes, score and one-line why.
-7. **Research and discussion** — METAs and plans worth a comment or a sketch.
-8. **Housekeeping** — docs and notes-to-issues work.
-9. **Watch** — claimed items worth following.
-
-End with routing per lanes.md: how to claim (comment with an ETD, assign yourself), where to post (story findings → `ai_demo`; request answers → the requesting issue; complex → the meeting issue), and the disclosure block reminder. Point to the guide pages: `guide/04-story-review.md`, `guide/05-answer-a-ux-review-request.md`, `guide/06-file-a-ux-issue.md`.
-
-### 5. Write (only on request)
-
-When the user asks for a file (`--write`, "save this", "write the radar"), write `UX-RADAR-<YYYY-MM-DD>.md` in the current directory with the same sections, a generation line (date, sprint label, item count), and the point-in-time caveat. Never commit.
+| Lane | How an item gets there | Where findings go |
+|---|---|---|
+| story-review | `ai_demo` issue titled `UX review: … story`, or a first-impression test | summary comment on the review issue; one `ai_demo` issue per UI finding; `guide/04-story-review.md`, `ai-ux-story-review` skill |
+| review-request | label `Needs UX review` | answer on the requesting issue; complex → Monday meeting; `guide/05-answer-a-ux-review-request.md` |
+| accessibility | label `accessibility`, or WCAG/contrast/keyboard/screen-reader wording | issue or comment with the proposal; `guide/06-file-a-ux-issue.md` |
+| content-naming | label/wording/help text/icon/description wording | same |
+| design-exploration | label `Needs design`, or UI/layout/dialog/filter/menu wording | same |
+| research-ia | `category::plan`, `[Meta]`, roadmap, journey | comment or child issue; do not assign METAs |
+| housekeeping | `ai_initiative` docs and meeting-notes tasks | as the issue says |
 
 ## Edge cases
 
-- 429 → wait once per `Retry-After`, rerun, flag partial data if it persists.
-- Labels drift (the census in queries.md shows which variants are live). A scan returning 0 story reviews and 0 requests is more likely a label change than an empty queue; say so.
-- `state::fixed`/`closed`/`postponed` on an open issue means done. `blocked`/`inProgress` means someone's work.
-- Meeting notes live in the issue **description**, not comments. The next meeting's issue is usually empty until the call.
-- drupal.org links 404; GitLab may redirect `/-/issues/` to `/-/work_items/`; same page.
+- Labels lag: an open issue labelled `fixed` or `rtbc` is done. `blocked` / `inProgress` is someone's work.
+- A scan with zero story reviews and zero requests is more likely a label change than an empty queue; say so and point at the label census in the script's docstring.
+- 429: wait once per `Retry-After`, rerun, flag partial data.
+- The next meeting's issue is usually empty until the call; the notes you want are in the previous one.
+- GitLab may redirect `/-/issues/` to `/-/work_items/`; same page.

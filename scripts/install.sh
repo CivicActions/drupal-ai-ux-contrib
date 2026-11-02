@@ -49,10 +49,12 @@ for skill_dir in "$kit"/skills/*/; do
   fi
 done
 
-# The skill calls scripts/ux_radar.py relative to the kit; a copy of the skill needs it too.
+# The skills call scripts/*.py relative to the kit; a copy of the skills needs them too.
 if [ "$mode" = copy ]; then
   mkdir -p "$target/scripts"
-  cp "$kit/scripts/ux_radar.py" "$target/scripts/ux_radar.py"
-  echo "$target/scripts/ux_radar.py -> $kit/scripts/ux_radar.py"
+  for f in ux_radar.py story_steps.py; do
+    cp "$kit/scripts/$f" "$target/scripts/$f"
+    echo "$target/scripts/$f -> $kit/scripts/$f"
+  done
 fi
 echo "done ($mode, $client) in $target"

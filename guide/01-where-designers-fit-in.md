@@ -1,4 +1,4 @@
-# 1. Why you are wanted
+# 1. Where designers fit in
 
 The Drupal AI Initiative builds the `drupal/ai` module ecosystem: providers, agents, chatbots, CKEditor tools, translation, content review, the Context Control Center (CCC), and the public [AI demo](https://new.drupal.org/ai/demo). Most contributors are developers. A small UX track reviews what they ship and is short on hands.
 

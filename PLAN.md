@@ -73,7 +73,7 @@ Portability rule: the skill must run with **no local Drupal, no DDEV, no glab, n
 
 ### 2.2 Onboarding guide — sections
 
-1. **Why you are wanted** — the three lanes (Inside AI / Outside AI / People), the UX track, what designers have shipped (Rotterdam demo, story reviews).
+1. **Where designers fit in** — the three lanes (Inside AI / Outside AI / People), the UX track, what designers have shipped (Rotterdam demo, story reviews).
 2. **First week checklist** — drupal.org account → GitLab sign-in, Slack `#ai-ux` + `#ai` + `#ai-contrib`, intro message (template), start a Drupal Forge demo instance, read the 5 UX docs pages, attend one Monday meeting (read the current meeting issue first).
 3. **Where the work is** — the §1.2 map, kept current by running the radar. Which labels mean what; which tag to use (`Needs UX review`, not the core one).
 4. **How to do a story review** — the ai_demo protocol step by step, board setup, how to post, what "pair with low-fi exploration" means in practice.

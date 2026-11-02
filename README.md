@@ -4,7 +4,7 @@ Onboarding guide and agent skills for designers and UX practitioners joining the
 
 ## Start here
 
-1. Read [guide/01-why-you-are-wanted.md](guide/01-why-you-are-wanted.md), then work through [guide/02-first-week.md](guide/02-first-week.md).
+1. Read [guide/01-where-designers-fit-in.md](guide/01-where-designers-fit-in.md), then work through [guide/02-first-week.md](guide/02-first-week.md).
 2. Run the radar to see what needs a designer this week (see below).
 3. Pick a story review or a `Needs UX review` request from the radar and follow the matching how-to in `guide/`. For a story review, the `ai-ux-story-review` skill builds the protocol and drafts the write-up.
 

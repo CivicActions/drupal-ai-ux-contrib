@@ -127,7 +127,15 @@ Non-skill items:
 - **Upstream docs contributions** the team can own on day one: add UX to the contribute page's non-code list; the meeting-notes-to-issues task (3559136); DrupalForge-testable-issue docs (3583362).
 - **Label consolidation proposal** to the UX track (`UX`/`ux`/`what::ux`/`Needs UX review`/`needs ux review`): a tidy win that also simplifies the radar.
 - **Figma board index** — one page listing the shared board and per-review decks (the 26 Oct notes link one; others are scattered in issue comments).
-- **Pairing**: first review done alongside an existing attendee; ask in `#ai-ux`.
+- **Pairing**: first review done alongside an existing attendee; ask in `#ai-ux`. (In the checklist since 2026-11-03.)
+
+Newcomer orientation, not yet built (2026-11-03; `Novice` is a code label, 242 open instance-wide, 3 UX-shaped in the initiative, so the radar uses its own starter rules):
+
+- **Drupal-for-designers primer** — one page on admin UI anatomy: toolbar, Claro/Gin, configuration forms, where AI settings live (`/admin/config/ai`), what a module turns on. The glossary covers words; this would cover screens. Build after a designer asks.
+- **Shadow a review** — a checklist step: comment on a claimed story review offering to pair, or attend one Monday meeting before claiming. Cheap; add when the first-week checklist has been run cold.
+- **`explain_issue.py`** — terminal twin of the skill's "Explain an issue" section, for people without an AI client. Only if the skill-only version proves insufficient.
+- **Review-request starter kit** — the `ai-ux-review-response` skill above, scoped down: a comment template plus the two principles pages. Most `comment-answer` picks are this.
+- **Team-side, not repo** — a 15-minute weekly internal check-in on blockers for the first month.
 
 ## 4. Phases
 
@@ -138,7 +146,8 @@ Non-skill items:
 | 2 | `ai-ux-radar` SKILL.md + queries.md + lanes.md; `ux_radar.py`; Copilot adapter; validate on 3 clients against live API | done 2026-11-02; fetcher validated live, client run-through pending |
 | 3 | `ai-ux-story-review` skill (plan + report modes, `story_steps.py`), guide trim | done 2026-11-02 |
 | 3b | Zero-config rewrite: script prints the report, self-contained skills, lite scan; profile/lanes/queries/report-formats removed | done 2026-11-02 |
-| 4 | Meeting-prep skill; upstream docs issues filed; confirm the lite scan in a web client | next |
+| 3c | Newcomer mode (`--starter`: Good first picks with a reason each, Before-you-pick orientation, worked example), issue explainer and label decoder in the radar skill, buddy ask in the checklist | done 2026-11-03 |
+| 4 | Meeting-prep skill; upstream docs issues filed; confirm the lite scan in a web client; newcomer ideas below as the team reports friction | next |
 
 Validation per phase: a designer on the team runs the first-week checklist and the radar cold, without help; fix what they trip on before adding more. Re-run the §1.3 label census monthly — the queries in the radar must track drift.
 

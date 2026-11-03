@@ -18,6 +18,6 @@ Labels you will see and what they mean:
 - `ai::inside` / `ai::outside` / `ai::internal` — the lane.
 - `state::toBeTriaged` / `readyForWork` / `accepted` — open for pickup. `inProgress` / `blocked` — someone's work. `needsReview` / `rtbc` — awaiting review or merge. `fixed` / `closed` / `postponed` — done or parked, even if the issue is still open.
 - `Needs UX review` — the UX track's request tag. Not `Needs usability review`, which is Drupal core's.
-- `Novice` — marked as a starter task by maintainers.
+- `Novice` — marked as a starter task by maintainers; mostly code tasks. The radar's newcomer mode (`--starter`) uses its own rules for design starters.
 
 Where findings go: story-review findings are filed in `ai_demo`; the feature modules opt in to what they want. UX review answers go on the requesting issue. Anything complex goes to the Monday meeting.

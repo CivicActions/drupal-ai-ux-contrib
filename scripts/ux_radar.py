@@ -3,6 +3,7 @@
 
   python3 scripts/ux_radar.py            # markdown report (default)
   python3 scripts/ux_radar.py --lite     # three fetches only: requests, story reviews, UX meeting
+  python3 scripts/ux_radar.py --starter  # newcomer mode: "Good first picks" and orientation first
   python3 scripts/ux_radar.py --tsv      # one row per candidate
   python3 scripts/ux_radar.py --json
   python3 scripts/ux_radar.py --sprint 21   # skip sprint detection
@@ -40,6 +41,15 @@ DEMO_KEYWORDS = re.compile(
     r"experience|feature page|screenshot|wording|instructions?)\b", re.I)
 TERMINAL = {"state::fixed", "state::closed", "state::postponed", "state::blocked", "state::inProgress", "state::rtbc"}
 ASK_FIRST_PROJECTS = {"canvas"}   # own design team; ask in #ai-ux before picking
+MR_IN_FLIGHT = {"state::needsreview", "state::needswork"}   # a merge request exists; reviewing it needs a dev or screenshots
+HEAVY = re.compile(r"\[(Meta|Plan)\]|\bMETA\b|roadmap|strategy|drastically|redesign|evolution|architecture", re.I)
+STARTER_WHY = {
+    "demo-instance": "a story review: runs on a free demo instance, protocol in guide/04 and the ai-ux-story-review skill",
+    "comment-answer": "a request for a designer's opinion: answer in a comment, nothing to build",
+    "single-screen": "one admin screen, one finding: propose the fix in a comment or a sketch",
+    "novice": "maintainers labelled it Novice",
+    "docs": "a writing task (docs, guidance, notes): you learn the landscape while doing it",
+}
 MEETING_TITLE = re.compile(r"Drupal AI UX meeting (\d{1,2} \w+ \d{4})", re.I)
 LANES = ["story-review", "review-request", "accessibility", "content-naming", "design-exploration",
          "research-ia", "housekeeping", "other-ux"]
@@ -136,6 +146,29 @@ def lane_for(it):
     return "other-ux"
 
 
+def starter_reason(it):
+    """Why an unclaimed item suits someone new to Drupal and the initiative, or None."""
+    labels_l = {l.lower() for l in it["labels"]}
+    if it["assignees"] or it["project"] in ASK_FIRST_PROJECTS or HEAVY.search(it["title"]):
+        return None
+    if labels_l & ({l.lower() for l in TERMINAL} | MR_IN_FLIGHT):
+        return None
+    lane = it["lane"]
+    if lane == "story-review" and re.search(r"UX review:|first[- ]impression", it["title"], re.I):
+        return "demo-instance"
+    if lane == "review-request":
+        return "comment-answer"
+    if "novice" in labels_l:
+        return "novice"
+    if re.search(r"guidance|documentation|\bdocs\b", it["title"], re.I):
+        return "docs"
+    if lane in ("content-naming", "accessibility") and labels_l & {"what::ux", "accessibility"}:
+        return "single-screen"
+    if lane == "housekeeping":
+        return "docs"
+    return None
+
+
 def signals(it, current_label, today):
     s = []
     s.append("claimed:" + ",".join(it["assignees"]) if it["assignees"] else "unclaimed")
@@ -149,6 +182,9 @@ def signals(it, current_label, today):
         s.append("novice")
     if it["project"] in ASK_FIRST_PROJECTS:
         s.append("ask-first")
+    why = starter_reason(it)
+    if why:
+        s.append(f"starter:{why}")
     term = sorted(l for l in it["labels"] if l in TERMINAL)
     if term:
         s.append("terminal:" + ",".join(term))
@@ -180,6 +216,7 @@ def meetings(today):
 # ---------- collect ----------
 def collect(current_label, lite):
     items = {}
+    orient = {}
 
     def add(issues, source, keep=lambda i: True):
         for i in issues or []:
@@ -193,8 +230,11 @@ def collect(current_label, lite):
     demo = pages("projects/project%2Fai_demo/issues", {"state": "opened"}, max_pages=1)
     add(demo, "ai_demo", lambda i: bool(DEMO_KEYWORDS.search(i["title"]))
         or bool({l.lower() for l in i.get("labels") or []} & {"ui", "ux", "needs ux review"}))
+    meta = [i for i in demo if re.search(r"^\[Meta\].*UX review", i["title"], re.I)]
+    if meta:
+        orient["meta"] = norm(meta[0], "ai_demo")
     if lite:
-        return items, set()
+        return items, set(), orient
 
     sprint_issues = pages(f"{GROUP}/issues", {"state": "opened", "labels": current_label})
     init_issues = pages(f"{GROUP}/issues", {"state": "opened", "labels": "AI Initiative Sprint"}, max_pages=3)
@@ -205,7 +245,17 @@ def collect(current_label, lite):
     for label in SCOPED_LABELS:
         add(pages(f"{GROUP}/issues", {"state": "opened", "labels": label}, max_pages=1), f"label:{label}",
             lambda i: i["references"]["full"].split("#")[0].replace("project/", "") in projects)
-    return items, projects
+    return items, projects, orient
+
+
+def worked_example():
+    """Most recently updated closed story review with a discussion: the thing to read before doing one."""
+    rows = get("projects/project%2Fai_demo/issues",
+               {"state": "closed", "search": "UX review", "in": "title", "order_by": "updated_at", "per_page": 10})
+    for r in rows or []:
+        if r.get("user_notes_count", 0) >= 3 and re.match(r"UX review:", r["title"], re.I):
+            return norm(r, "ai_demo")
+    return None
 
 
 # ---------- output ----------
@@ -238,12 +288,37 @@ def excerpt(desc, limit=2500):
         m = re.search(rf"#+\s*{h}.*?(?=\n#|\Z)", desc, re.S | re.I)
         if m:
             keep.append(m.group(0).strip())
+    if not keep and re.search(r"Add notes here", desc):
+        return "(agenda not posted yet)"
     text = "\n\n".join(keep) if keep else desc
     text = re.sub(r"(?m)^#{1,6}\s*", "#### ", text)  # keep the report's own section levels
     return text[:limit] + (f"\n… ({len(text) - limit} more chars; open the issue)" if len(text) > limit else "")
 
 
-def report(rows, current, probe, mtg, today, lite):
+def starter_sections(rows, orient):
+    picks = [r for r in rows if any(s.startswith("starter:") for s in r["signals"])]
+    out = ["## Good first picks", "",
+           "Unclaimed, no merge request in flight, not a META, not Canvas. Pick one; comment an ETD and assign yourself.", ""]
+    for r in picks[:8]:
+        why = next(s for s in r["signals"] if s.startswith("starter:")).split(":", 1)[1]
+        out.append(f"{row(r)}  \n  why: {STARTER_WHY[why]}")
+    if not picks:
+        out.append("none today; take the oldest unclaimed story review or UX review request below")
+    if len(picks) > 8:
+        out.append(f"- … {len(picks) - 8} more; `--tsv` and filter on `starter:`.")
+    out += ["", "## Before you pick", ""]
+    if orient.get("example"):
+        out.append(f"- Read a finished review first: {link(orient['example'])} — {orient['example']['title']}. "
+                   "The summary comment and its follow-up issues show the shape your write-up takes.")
+    if orient.get("meta"):
+        out.append(f"- The list of stories and who reviews what: {link(orient['meta'])} — {orient['meta']['title']}.")
+    out += ["- guide/02-first-week.md: accounts, Slack `#ai-ux`, a free Drupal Forge demo instance (no Drupal install), the five UX docs pages.",
+            "- Say hello in `#ai-ux` (templates/intro-message.md) and ask for a buddy for your first review; pairing is normal.",
+            "- Labels and jargon: guide/08-glossary.md, or ask the assistant to explain an issue (ai-ux-radar skill).", ""]
+    return out
+
+
+def report(rows, current, probe, mtg, today, lite, starter=False, orient=None):
     label = f"2026Sprint{current}"
     live = [r for r in rows if not any(s.startswith("terminal:") for s in r["signals"])]
     claimed = lambda r: any(s.startswith("claimed:") for s in r["signals"])
@@ -253,7 +328,7 @@ def report(rows, current, probe, mtg, today, lite):
     canvas = [r for r in live if ask(r)]
     by = lambda lane, pool: [r for r in pool if r["lane"] == lane]
     out = [f"# AI UX radar — {today}", "",
-           f"{'Lite scan (requests, story reviews, meeting). ' if lite else ''}Sprint {label}"
+           f"{'Lite scan (requests, story reviews, meeting). ' if lite else ''}{'Newcomer mode. ' if starter else ''}Sprint {label}"
            + (f" (open issues group/ai: " + ", ".join(f"S{n} {g}/{a}" for n, g, a in probe) + ")" if probe else "")
            + f". {len(live)} open candidates, {len(open_)} unclaimed. Point-in-time; recheck before claiming.", ""]
     out += ["## This Monday's UX meeting", ""]
@@ -264,6 +339,8 @@ def report(rows, current, probe, mtg, today, lite):
                     excerpt(r.get("description")) if key == "previous" or (r.get("description") or "").strip() else "(agenda not posted yet)", ""]
     if not mtg:
         out += ["none found", ""]
+    if starter:
+        out += starter_sections(open_, orient or {})
     out += section("Story reviews (unclaimed first)", by("story-review", open_) + by("story-review", watch))
     reqs = sorted(by("review-request", open_), key=lambda r: r["updated"])
     out += section("UX review requests (oldest first; SLA is 3 business days)", reqs)
@@ -298,12 +375,15 @@ def main():
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--sprint", type=int, help="skip detection")
     ap.add_argument("--include-terminal", action="store_true", help="keep fixed/closed/postponed/blocked/inProgress/rtbc")
+    ap.add_argument("--starter", action="store_true", help="newcomer mode: Good first picks + orientation before the lanes")
     args = ap.parse_args()
     today = dt.date.today()
 
     current, probe = detect_sprint(today, args.sprint)
     current_label = f"2026Sprint{current}"
-    items, projects = collect(current_label, args.lite)
+    items, projects, orient = collect(current_label, args.lite)
+    if args.starter:
+        orient["example"] = worked_example()
     rows = []
     for it in items.values():
         it["lane"] = lane_for(it)
@@ -320,7 +400,8 @@ def main():
     if args.json:
         json.dump({"today": today.isoformat(), "sprint": {"current": current, "label": current_label,
                    "probe": [{"n": n, "group": g, "ai": a} for n, g, a in probe]}, "lite": args.lite,
-                   "projects": sorted(projects), "items": rows,
+                   "projects": sorted(projects), "items": rows, "starter": args.starter,
+                   "orientation": {k: v for k, v in orient.items() if v},
                    "meetings": {k: {"date": d.isoformat(), "iid": r["iid"], "title": r["title"],
                                     "url": f"{GL}ai_initiative/-/issues/{r['iid']}", "description": r.get("description") or ""}
                                 for k, (d, r) in mtg.items()}}, sys.stdout, indent=1, default=str)
@@ -331,7 +412,7 @@ def main():
         for r in rows:
             print("\t".join([r["lane"], r["ref"], ",".join(r["signals"]), ",".join(r["labels"]) or "-", r["updated"], r["title"], r["url"]]))
         return
-    print(report(rows, current, probe, mtg, today, args.lite))
+    print(report(rows, current, probe, mtg, today, args.lite, args.starter, orient))
 
 
 if __name__ == "__main__":

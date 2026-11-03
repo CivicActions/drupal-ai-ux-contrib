@@ -18,6 +18,8 @@ Onboarding guide and two agent skills for designers and UX practitioners joining
 
 `<project-dir>` can be this checkout. The install script symlinks by default; `--copy` for clients that do not follow symlinks.
 
+New to Drupal or the initiative? Add `--starter` in the terminal, or tell the assistant "I'm new, where do I start": the report opens with **Good first picks** (unclaimed, no merge request in flight, no METAs, with one line of why each) and a **Before you pick** block that links a finished story review to read first. Paste any issue link and ask the assistant to explain it; it decodes the labels and says what a designer can do there.
+
 ## The story-review skill
 
 `ai-ux-story-review` works in every client, including by paste. Plan mode reads one review issue and writes the protocol and board outline. Report mode turns your findings into the summary comment and follow-up issues in the shape the UX track uses. It fetches at most one issue and never posts.
@@ -27,7 +29,7 @@ Onboarding guide and two agent skills for designers and UX practitioners joining
 ```
 guide/                         onboarding guide, one page per topic
 templates/                     intro message, story-review board, review response, UX issue body
-skills/ai-ux-radar/SKILL.md    self-contained; full scan via the script, lite scan via three URLs
+skills/ai-ux-radar/SKILL.md    self-contained; full scan via the script, lite scan via three URLs, newcomer mode, issue explainer
 skills/ai-ux-story-review/     SKILL.md with the report formats inline; reference/protocol.md has the question banks
 scripts/ux_radar.py            the radar: detects the sprint, fetches, classifies, prints the report (stdlib only)
 scripts/story_steps.py         prints a demo story page as markdown steps

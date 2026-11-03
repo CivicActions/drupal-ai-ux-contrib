@@ -4,7 +4,7 @@
 
 **The drupal.org "AI Initiative" project page says unsupported.** It is legacy. Current entry points: https://new.drupal.org/ai and the module docs at https://project.pages.drupalcode.org/ai/1.4.x/.
 
-**When is the UX meeting?** Mondays, weekly. Time and link are shared in `#ai-ux` only. The agenda and notes are public in the `ai_initiative` meeting issue.
+**When is the UX meeting?** Mondays, weekly. The time is in the meeting issue's description; the call link comes with the invitation, which you ask for in `#ai-ux`. Agenda and notes are public in the `ai_initiative` meeting issue; the radar shows the previous meeting's decisions and next steps.
 
 **I cannot find the demo source code.** The build repositories are partner-only. Everyone can file and comment in the public `ai_demo` queue; partners triage and build.
 
@@ -14,4 +14,6 @@
 
 **Someone is already assigned.** Leave it unless the issue has been silent for two weeks; then ask on the issue whether help is wanted.
 
-**The radar shows something labelled `state::fixed` but still open.** Labels lag. Treat `fixed`, `closed`, `postponed` as done.
+**The radar shows something labelled `state::fixed` but still open.** Labels lag. Treat `fixed`, `closed`, `postponed` as done. The radar hides these by default; `--include-terminal` shows them.
+
+**The radar shows nothing in Good first picks.** Everything that qualifies is claimed, or has a merge request in flight. Take the oldest unclaimed story review or UX review request, or ask in `#ai-ux`.

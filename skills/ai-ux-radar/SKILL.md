@@ -13,7 +13,7 @@ Show a designer what the Drupal AI Initiative needs from them this week. Read-on
 python3 scripts/ux_radar.py
 ```
 
-The script lives next to this skill (`../../scripts/ux_radar.py` from this file, or `scripts/ux_radar.py` in the project when installed with `--copy`). Stdlib only, about ten seconds. It detects the current sprint, fetches, classifies, and prints the finished markdown report. Present that report; do not rebuild it. Then answer the user's question (what to pick up, what is on Monday, what is unclaimed) from it. If the user names a lane or skill ("I do content design", "accessibility only"), lead with that section.
+The script lives next to this skill (`../../scripts/ux_radar.py` from this file, or `scripts/ux_radar.py` in the project when installed with `--copy`). Stdlib only, ten to fifteen seconds. It detects the current sprint, fetches, classifies, and prints the finished markdown report. Present that report; do not rebuild it. Then answer the user's question (what to pick up, what is on Monday, what is unclaimed) from it. If the user names a lane or skill ("I do content design", "accessibility only"), lead with that section.
 
 Flags: `--lite` (below), `--starter` (newcomer mode, below), `--tsv`, `--json`, `--sprint NN` to skip detection, `--include-terminal` to show items whose labels say fixed/closed/postponed/blocked/inProgress/rtbc (hidden by default: done, or someone's work).
 
